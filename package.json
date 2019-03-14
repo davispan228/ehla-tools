@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "csvtojson": "^2.0.8",
     "file-saver": "^2.0.1",
+    "jszip": "^3.2.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-dropzone": "^10.0.2",

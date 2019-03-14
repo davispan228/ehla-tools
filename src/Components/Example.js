@@ -57,6 +57,35 @@ export default class SentenceSRT2WordSRT extends Component {
   }
 
 
+  on = () => {
+    var fs = require('fs');
+    var path = require('path');
+    const csv = require('csvtojson')
+    const rootDirPath = path.resolve(__dirname, './csv');
+    const extName = ".csv";
+
+    //get directory names
+    const batchDirPath = path.resolve(__dirname, `./${new Date().getTime()}`);
+    fs.mkdirSync(batchDirPath, 0744);
+
+    fs.readdirSync(rootDirPath, { withFileTypes: true }).filter(_=>!_.isDirectory()).map(async (dn)=>{
+      //read csv json
+      let data = await csv().fromFile(`${rootDirPath}/${dn.name}`);
+      let dirName = dn.name.substr(0, dn.name.length - extName.length);
+      let dirPath = `${batchDirPath}/${dirName}`;
+      fs.mkdirSync(dirPath, 0744);
+      
+      //create time file
+      fs.writeFile(`${dirPath}/time`, data.map(_=>`${_.start_ms} ${_.end_ms}`).join("\n"), e=>{if(e) throw new Error(e)});
+      
+      ['id', 'en', 'hk', 'cn', 'tw', 'jp', 'kr'].forEach(fn=>{
+        fs.writeFile(`${dirPath}/${fn}`, data.map(_=>_[fn]).join("\n"), e=>{if(e) throw new Error(e)});
+      })
+      
+    });
+  }
+
+
   render() {
     return (
       <div className="example">
