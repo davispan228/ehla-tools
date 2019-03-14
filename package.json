@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "file-saver": "^2.0.1",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "react-scripts": "2.1.8"
+    "react-dropzone": "^10.0.2",
+    "react-scripts": "2.1.8",
+    "subtitle": "^2.0.2"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -26,5 +29,6 @@
   ],
   "devDependencies": {
     "gh-pages": "^2.0.1"
-  }
+  },
+  "homepage": "https://davispan228.github.io/ehla-tools/"
 }
