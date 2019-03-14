@@ -40,7 +40,7 @@ export default class SentenceSRT2WordSRT extends Component {
   sentence2wordSRT = (parsedSRT) => {
     let { start, text } = parsedSRT;
     let words = text.split(" ").map(this.parseWord).filter(_=>_!="");
-    return words.map((text,i)=>({ start: i==0?start:0, end: 0, text }));
+    return words.map((text,i)=>({ start: i==0?start:0, end:i==0?start:0, text }));
   }
 
 
