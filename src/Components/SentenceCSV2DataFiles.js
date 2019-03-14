@@ -74,7 +74,7 @@ export default class SentenceCSV2DataFiles extends Component {
           <section >
             <div {...getRootProps()} style={{ border: '1px solid black', maxWidth: '100%', color: 'black', margin: 20 }}>
               <input {...getInputProps()} />
-              <center><h1>Drag files here to convert sentance csv to data zip file</h1></center>
+              <center><h1>2. CSV -> Data Zip</h1></center>
             </div>
           </section>
         )}

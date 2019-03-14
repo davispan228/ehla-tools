@@ -44,16 +44,30 @@ export default class SentenceSRT2WordSRT extends Component {
   }
 
 
+  getFileName = (file) => {
+    let outFilePathComponent = file.path.split('.');
+    outFilePathComponent.pop();
+    return outFilePathComponent.join(".");
+  }
+
   convert = async (file) => {
     let content = await this.readFile(file);
     let parsed = parseSRT(content);
+
+    //output words SRT
     let wordsSRT = [].concat(...parsed.map(this.sentence2wordSRT));
     let outputData = stringifySRT(wordsSRT);
     let blob = new Blob([outputData], {type: "text/plain;charset=utf-8"});
+ 
+    let fn = this.getFileName(file);
+    saveAs(blob, `${fn}_word.srt`);
 
-    let outFilePathComponent = file.path.split('.');
-    outFilePathComponent.pop();
-    saveAs(blob, `${outFilePathComponent.join(".")}_word.srt`);
+    //output sentence CSV
+    outputData = "start_ms,end_ms,id,en,hk,cn,tw,jp,kr\n";
+    outputData += parsed.map(_=>`${_.start},${_.end},,"${_.text}",,,,,`).join("\n");
+    blob = new Blob([outputData], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, `${fn}.csv`);
+    
   }
 
   onDrop = async (acceptedFiles) => {
@@ -67,7 +81,7 @@ export default class SentenceSRT2WordSRT extends Component {
           <section >
             <div {...getRootProps()} style={{ border: '1px solid black', maxWidth: '100%', color: 'black', margin: 20 }}>
               <input {...getInputProps()} />
-              <center><h1>Drag files here to convert sentance srt to words srt</h1></center>
+              <center><h1>1. Sentences SRT -> Words SRT + Sentences CSV </h1></center>
             </div>
           </section>
         )}
