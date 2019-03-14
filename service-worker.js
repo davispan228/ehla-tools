@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/ehla-tools/precache-manifest.660b12512ec1ad0e85dc4f303beaec55.js"
+  "/ehla-tools/precache-manifest.b828a4a7d5fbeb2564a8ac6092ebba53.js"
 );
 
 workbox.clientsClaim();
