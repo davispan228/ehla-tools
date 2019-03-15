@@ -47,6 +47,7 @@ export default class SentenceCSV2DataFiles extends Component {
 
   convert = async (file) => {
     let content = await this.readFile(file);
+    content = content.replace("\uFEFF", "");
     
     let zip = new JSZip();
     let data = await Csv().fromString(content);
