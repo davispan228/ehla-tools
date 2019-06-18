@@ -66,6 +66,7 @@ export default class ConsolidatedCSV2I18nJSONFiles extends Component {
     langs.forEach(lang=>{
       let i18nJSON = {}
       data.forEach(_=>i18nJSON[_.id] = _[lang]);
+      delete i18nJSON[""];  //remove empty key
       zip.file(`${lang}`, JSON.stringify(i18nJSON));
     });
 

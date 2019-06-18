@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import Dropzone from 'react-dropzone'
 import { saveAs } from 'file-saver';
 import Csv from "csvtojson";
+import { parse as parseSRT, stringify as stringifySRT } from 'subtitle';
 import JSZip from "jszip";
 
 export default class SentenceCSV2DataFiles extends Component {
@@ -45,8 +46,10 @@ export default class SentenceCSV2DataFiles extends Component {
   }
 
 
-  convert = async (file) => {
-    let content = await this.readFile(file);
+  convert = async (files) => {
+
+    //CSV => data files
+    let content = await this.readFile(files.csv);
     content = content.replace("\uFEFF", "");
     
     let zip = new JSZip();
@@ -58,14 +61,62 @@ export default class SentenceCSV2DataFiles extends Component {
       zip.file(`${fn}`, data.map(_=>_[fn]).join("\n"));
     })
 
+
+    //tuning of words srt files 
+    let sentenceTimeRanges = data.map(_=>({ text:_.en, start:parseInt(_.start_ms), end:parseInt(_.end_ms)}));
+    content = await this.readFile(files.srt);
+    let parsed = parseSRT(content);
+
+    console.log(`sentenceTimeRanges:${JSON.stringify(sentenceTimeRanges)}`);
+    console.log(`parsed[0]:${JSON.stringify(parsed[0])}`);
+    
+
+    let curIndex = 0, curSentence = {...sentenceTimeRanges[0]};
+    let outboundRecords = [], tunedRecords = [];
+    let turned = parsed.map(_=>{
+      //check time range
+      while(curSentence.text.indexOf(_.text) == -1){
+        curSentence = {...sentenceTimeRanges[++curIndex]};
+      }
+
+      let { text, start, end } = curSentence;
+
+      let returnSrt = null;
+      if(_.end < start || _.start > end) outboundRecords.push(_);
+      else if(_.start >= start && _.end <= end) returnSrt = _;
+      else if(_.start < start) returnSrt = { ..._, start };
+      else if(_.end > end) returnSrt = { ..._, end };
+
+      if(returnSrt){
+        if(returnSrt != _) tunedRecords.push({ from:_, to: returnSrt });
+        curSentence.text = text.substring(text.indexOf(_.text) + _.text.length);
+      }
+      return returnSrt;
+    }).filter(_=>_!=null);
+
+    console.log(`outbound records:${JSON.stringify(outboundRecords)}`);
+    console.log(`tuned records:${JSON.stringify(tunedRecords)}`);
+    
+
+    //output words SRT
+    // let wordsSRT = [].concat(...parsed.map(this.sentence2wordSRT));
+    let outputData = stringifySRT(turned);
+    zip.file('word_tuned.srt', outputData);
+
+
     let blob = await zip.generateAsync({type:"blob"});
-    let outFilePathComponent = file.path.split('.');
+    let outFilePathComponent = files.csv.path.split('.');
     outFilePathComponent.pop();
     saveAs(blob, `${outFilePathComponent.join(".")}.zip`);
   }
 
   onDrop = async (acceptedFiles) => {
-    acceptedFiles.forEach(this.convert);
+    let files = {
+      csv: acceptedFiles.find(f=>f.path.endsWith('.csv')),
+      srt: acceptedFiles.find(f=>f.path.endsWith('.srt'))
+    }
+    if(!files.csv || !files.srt) alert('please drop sentence csv and word srt files to me')
+    this.convert(files);
   }
 
   render() {
@@ -75,7 +126,7 @@ export default class SentenceCSV2DataFiles extends Component {
           <section >
             <div {...getRootProps()} style={{ border: '1px solid black', maxWidth: '100%', color: 'black', margin: 20 }}>
               <input {...getInputProps()} />
-              <center><h1>2. CSV -> Data Zip</h1></center>
+              <center><h1>2. Words SRT + Sentence CSV -> Tuned Words SRT + Data Zip</h1></center>
             </div>
           </section>
         )}
