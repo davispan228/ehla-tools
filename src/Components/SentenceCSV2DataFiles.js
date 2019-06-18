@@ -72,11 +72,19 @@ export default class SentenceCSV2DataFiles extends Component {
     
 
     let curIndex = 0, curSentence = {...sentenceTimeRanges[0]};
-    let outboundRecords = [], tunedRecords = [];
+    let invalidRecords = [], outboundRecords = [], tunedRecords = [];
     let turned = parsed.map(_=>{
       //check time range
       while(curSentence.text.indexOf(_.text) == -1){
-        curSentence = {...sentenceTimeRanges[++curIndex]};
+        //check if moving to next sentence?
+        let nextSentence = {...sentenceTimeRanges[curIndex+1]}
+        if(nextSentence && nextSentence.text.indexOf(_.text) != -1){
+          curIndex = curIndex + 1;
+          curSentence = nextSentence;
+        }else{
+          invalidRecords.push(_);
+          return null;
+        }
       }
 
       let { text, start, end } = curSentence;
@@ -94,15 +102,15 @@ export default class SentenceCSV2DataFiles extends Component {
       return returnSrt;
     }).filter(_=>_!=null);
 
-    console.log(`outbound records:${JSON.stringify(outboundRecords)}`);
-    console.log(`tuned records:${JSON.stringify(tunedRecords)}`);
-    
+
+
 
     //output words SRT
     // let wordsSRT = [].concat(...parsed.map(this.sentence2wordSRT));
     let outputData = stringifySRT(turned);
     zip.file('word_tuned.srt', outputData);
 
+    zip.file('word_srt_tuned_report.txt', `invalid records:\n${JSON.stringify(invalidRecords, null, 2)}\noutbound records:\n${JSON.stringify(outboundRecords, null, 2)}\ntuned records:\n${JSON.stringify(tunedRecords, null, 2)}`)
 
     let blob = await zip.generateAsync({type:"blob"});
     let outFilePathComponent = files.csv.path.split('.');
