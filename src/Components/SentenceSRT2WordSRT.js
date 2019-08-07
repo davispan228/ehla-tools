@@ -78,12 +78,12 @@ export default class SentenceSRT2WordSRT extends Component {
       //replace
       text = text.replace(/-/g,' ');
       text = text.replace(/,/g,' ');
-      text = text.replace(/./g,' ');
+      text = text.replace(/\./g,' ');
       text = text.replace(/!/g,' ');
       text = text.replace(/;/g,' ');
       const wordCount = text.split(' ').filter(_=>_!='').length;
-      return `${_.start},${_.end},,${wordCount},"${_.text}",,,,,`.join("\n");
-    });
+      return `${_.start},${_.end},,${wordCount},"${_.text}",,,,,`;
+    }).join("\n");
     blob = new Blob([outputData], {type: "text/plain;charset=utf-8"});
     saveAs(blob, `${fn}.csv`);
     
