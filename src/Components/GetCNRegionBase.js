@@ -75,10 +75,13 @@ export default class GetCNRegionBase extends Component {
       return props; 
     }
 
+    const publisherFilter = _ => _.region_ids && _.region_ids!="";
+
     //vocab_publishers
-    let vocab_publishers = data.vocab_publishers.map(parsePublisher);
-    let grammar_publishers = data.grammar_publishers.map(parsePublisher);
-    let listening_speaking_publishers = data.listening_speaking_publishers.map(parsePublisher); 
+    let vocab_publishers = data.vocab_publishers.filter(publisherFilter).map(parsePublisher);
+    let grammar_publishers = data.grammar_publishers.filter(publisherFilter).map(parsePublisher);
+    let listening_publishers = data.listening_publishers.filter(publisherFilter).map(parsePublisher); 
+    let speaking_publishers = data.speaking_publishers.filter(publisherFilter).map(parsePublisher); 
 
     //regions
     let regions = data.regions.map(_=>{
@@ -104,10 +107,16 @@ export default class GetCNRegionBase extends Component {
         ${grammar_publishers.map(_=>JSON.stringify(_)).join(',\n')}
       ]
     }`);
-    //listening_speaking_publishers
+    //speaking_publishers
     console.log(`{
-      "listening_speaking_publishers": [
-        ${listening_speaking_publishers.map(_=>JSON.stringify(_)).join(',\n')}
+      "speaking_publishers": [
+        ${speaking_publishers.map(_=>JSON.stringify(_)).join(',\n')}
+      ]
+    }`);
+    //listening_publishers
+    console.log(`{
+      "listening_publishers": [
+        ${listening_publishers.map(_=>JSON.stringify(_)).join(',\n')}
       ]
     }`);
 
