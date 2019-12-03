@@ -4,6 +4,7 @@ import SentenceCSV2DataFiles from  './Components/SentenceCSV2DataFiles'
 import I18nJSON2CSV from './Components/I18nJSON2CSV'
 import ConsolidatedCSV2I18nJSONFiles from './Components/ConsolidatedCSV2I18nJSONFiles'
 import GetCNRegionBase from './Components/GetCNRegionBase'
+import GetCacheBundles from './Components/GetCacheBundles'
 class App extends Component {
   render() {
     return (
@@ -13,6 +14,7 @@ class App extends Component {
         <I18nJSON2CSV />
         <ConsolidatedCSV2I18nJSONFiles />
         <GetCNRegionBase />
+        <GetCacheBundles />
       </div>
     );
   }
