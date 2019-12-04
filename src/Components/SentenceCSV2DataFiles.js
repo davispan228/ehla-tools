@@ -9,7 +9,6 @@ export default class SentenceCSV2DataFiles extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onTextAreaChange = this.onTextAreaChange.bind(this);
   }
 
   parseWord = (word) => {
@@ -18,11 +17,6 @@ export default class SentenceCSV2DataFiles extends Component {
     return word;
   }
 
-  onTextAreaChange(event) {
-    let para = event.target.value;
-    let sentences = para.split("\n");
-    let words = sentences.map(_=>_.split(" ").map(this.parseWord).filter(_=>_!=""));
-  }
 
   handleDroppedFile = (file) => {
     const value = file.result;
@@ -41,8 +35,8 @@ export default class SentenceCSV2DataFiles extends Component {
 
   sentence2wordSRT = (parsedSRT) => {
     let { start, text } = parsedSRT;
-    let words = text.split(" ").map(this.parseWord).filter(_=>_!="");
-    return words.map((text,i)=>({ start: i==0?start:0, end:i==0?start:0, text }));
+    let words = text.split(" ").map(this.parseWord).filter(_=>_!=="");
+    return words.map((text,i)=>({ start: i===0?start:0, end:i===0?start:0, text }));
   }
 
 
@@ -75,10 +69,10 @@ export default class SentenceCSV2DataFiles extends Component {
     let invalidRecords = [], outboundRecords = [], tunedRecords = [];
     let turned = parsed.map(_=>{
       //check time range
-      while(curSentence.text.indexOf(_.text) == -1){
+      while(curSentence.text.indexOf(_.text) === -1){
         //check if moving to next sentence?
         let nextSentence = {...sentenceTimeRanges[curIndex+1]}
-        if(nextSentence && nextSentence.text.indexOf(_.text) != -1){
+        if(nextSentence && nextSentence.text.indexOf(_.text) !== -1){
           curIndex = curIndex + 1;
           curSentence = nextSentence;
         }else{
@@ -96,7 +90,7 @@ export default class SentenceCSV2DataFiles extends Component {
       else if(_.end > end) returnSrt = { ..._, end };
 
       if(returnSrt){
-        if(returnSrt != _) tunedRecords.push({ from:_, to: returnSrt });
+        if(returnSrt !== _) tunedRecords.push({ from:_, to: returnSrt });
         curSentence.text = text.substring(text.indexOf(_.text) + _.text.length);
       }
       return returnSrt;

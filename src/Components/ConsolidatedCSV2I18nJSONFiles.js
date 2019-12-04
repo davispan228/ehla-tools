@@ -8,7 +8,6 @@ export default class ConsolidatedCSV2I18nJSONFiles extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onTextAreaChange = this.onTextAreaChange.bind(this);
   }
 
   parseWord = (word) => {
@@ -17,11 +16,6 @@ export default class ConsolidatedCSV2I18nJSONFiles extends Component {
     return word;
   }
 
-  onTextAreaChange(event) {
-    let para = event.target.value;
-    let sentences = para.split("\n");
-    let words = sentences.map(_=>_.split(" ").map(this.parseWord).filter(_=>_!=""));
-  }
 
   handleDroppedFile = (file) => {
     const value = file.result;
@@ -40,8 +34,8 @@ export default class ConsolidatedCSV2I18nJSONFiles extends Component {
 
   sentence2wordSRT = (parsedSRT) => {
     let { start, text } = parsedSRT;
-    let words = text.split(" ").map(this.parseWord).filter(_=>_!="");
-    return words.map((text,i)=>({ start: i==0?start:0, end:i==0?start:0, text }));
+    let words = text.split(" ").map(this.parseWord).filter(_=>_!=="");
+    return words.map((text,i)=>({ start: i===0?start:0, end:i===0?start:0, text }));
   }
 
 

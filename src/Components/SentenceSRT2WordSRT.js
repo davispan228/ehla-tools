@@ -7,19 +7,12 @@ export default class SentenceSRT2WordSRT extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onTextAreaChange = this.onTextAreaChange.bind(this);
   }
 
   parseWord = (word) => {
     //remove leading and trailing character space,.!
     word = word.replace(/(^['":,.!?\s]+)|(['":,.!?\s]+$)/g, '');
     return word;
-  }
-
-  onTextAreaChange(event) {
-    let para = event.target.value;
-    let sentences = para.split("\n");
-    let words = sentences.map(_=>_.split(" ").map(this.parseWord).filter(_=>_!=""));
   }
 
   handleDroppedFile = (file) => {
@@ -39,8 +32,8 @@ export default class SentenceSRT2WordSRT extends Component {
 
   sentence2wordSRT = (parsedSRT) => {
     let { start, text } = parsedSRT;
-    let words = text.split(" ").map(this.parseWord).filter(_=>_!="");
-    return words.map((text,i)=>({ start: i==0?start:0, end:i==0?start:0, text }));
+    let words = text.split(" ").map(this.parseWord).filter(_=>_!=="");
+    return words.map((text,i)=>({ start: i===0?start:0, end:i===0?start:0, text }));
   }
 
 
@@ -81,7 +74,7 @@ export default class SentenceSRT2WordSRT extends Component {
       text = text.replace(/\./g,' ');
       text = text.replace(/!/g,' ');
       text = text.replace(/;/g,' ');
-      const wordCount = text.split(' ').filter(_=>_!='').length;
+      const wordCount = text.split(' ').filter(_=>_!=='').length;
       return `${_.start},${_.end},,${wordCount},"${_.text}",,,,,`;
     }).join("\n");
     blob = new Blob([outputData], {type: "text/plain;charset=utf-8"});

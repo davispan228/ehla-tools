@@ -1,28 +1,16 @@
 import React, { Component } from 'react';
-import Dropzone from 'react-dropzone'
-import { saveAs } from 'file-saver';
-import Csv from "csvtojson";
-import { parse as parseSRT, stringify as stringifySRT } from 'subtitle';
-import JSZip from "jszip";
 import * as XLSX from 'xlsx';
 
 export default class GetCNRegionBase extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onTextAreaChange = this.onTextAreaChange.bind(this);
   }
 
   parseWord = (word) => {
     //remove leading and trailing character space,.!
     word = word.replace(/(^['":,.!?\s]+)|(['":,.!?\s]+$)/g, '');
     return word;
-  }
-
-  onTextAreaChange(event) {
-    let para = event.target.value;
-    let sentences = para.split("\n");
-    let words = sentences.map(_=>_.split(" ").map(this.parseWord).filter(_=>_!=""));
   }
 
   handleDroppedFile = (file) => {
@@ -42,8 +30,8 @@ export default class GetCNRegionBase extends Component {
 
   sentence2wordSRT = (parsedSRT) => {
     let { start, text } = parsedSRT;
-    let words = text.split(" ").map(this.parseWord).filter(_=>_!="");
-    return words.map((text,i)=>({ start: i==0?start:0, end:i==0?start:0, text }));
+    let words = text.split(" ").map(this.parseWord).filter(_=>_!=="");
+    return words.map((text,i)=>({ start: i===0?start:0, end:i===0?start:0, text }));
   }
 
 
@@ -70,12 +58,12 @@ export default class GetCNRegionBase extends Component {
     //publisher handler
     const parsePublisher = _=> {
       let { id, name_ref, region_ids, level_ids, ...props } = _;
-      props.region_idxes = region_ids.split(",").map(_=>data.regions.findIndex(r=>r.id==_));
-      props.level_values = level_ids.split(",").map(_=>data.levels.find(l=>l.id==_).value);
+      props.region_idxes = region_ids.split(",").map(_=>data.regions.findIndex(r=>r.id===_));
+      props.level_values = level_ids.split(",").map(_=>data.levels.find(l=>l.id===_).value);
       return props; 
     }
 
-    const publisherFilter = _ => _.region_ids && _.region_ids!="";
+    const publisherFilter = _ => _.region_ids && _.region_ids!=="";
 
     //vocab_publishers
     let vocab_publishers = data.vocab_publishers.filter(publisherFilter).map(parsePublisher);

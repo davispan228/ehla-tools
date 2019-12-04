@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Csv from "csvtojson";
 import { saveAs } from 'file-saver';
-import LoadingOverlay from 'react-loading-overlay';
 import { PromiseAllWithProgress }  from '../PromiseUtil';
 import JSZip from "jszip";
 const uuidv1 = require('uuid/v1');
@@ -11,19 +10,12 @@ export default class GetCNRegionBase extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.onTextAreaChange = this.onTextAreaChange.bind(this);
   }
 
   parseWord = (word) => {
     //remove leading and trailing character space,.!
     word = word.replace(/(^['":,.!?\s]+)|(['":,.!?\s]+$)/g, '');
     return word;
-  }
-
-  onTextAreaChange(event) {
-    let para = event.target.value;
-    let sentences = para.split("\n");
-    let words = sentences.map(_=>_.split(" ").map(this.parseWord).filter(_=>_!=""));
   }
 
   handleDroppedFile = (file) => {
@@ -46,57 +38,73 @@ export default class GetCNRegionBase extends Component {
     return outFilePathComponent.join(".");
   }
 
-
+  getURLExtention = _ => {
+    if (_.lastIndexOf('#') > 0) _ = _.substr(0, _.lastIndexOf('#'));
+    if (_.lastIndexOf('?') > 0) _ = _.substr(0, _.lastIndexOf('?'));
+    return _.substr(_.lastIndexOf('.') + 1);
+  }
 
   downloadAssetsBundle = async (data, resId) => {
     console.log(`downloading cache files for res Id = ${resId}`);
+
+    this.setState({ assetsRes: resId });
+
     let zip = new JSZip();
 
     let forbiddenURLs = {};
 
-    let promises = data.map(async _=>{
+    let promises = data.filter(_=>{
+      if(!_) { console.log(`invalid record:`, _); return false; }
+      if(!_['id']) { console.log(`invalid record:`, _); return false; }
+      if(_['id'] === 'cache_bundle') { console.log(`cache_bundle record, ignore`); return false; }
+      return true;
+    }).map(async _=>{
       let id = _['id'];
       let filename = uuidv1();
       let url = this.getS3Link(_[resId]);
-      console.log(`url:${url}`);
+      let returnObj = {
+        id, filename, url
+      };
+  
+
       try {
         let resp = await fetch(url);
-        console.log(resp);
-        let blob = await resp.blob();
-        return { id, filename, blob, url };
+        if(resp.status===200) returnObj.blob = await resp.blob();
       } catch (e) {
-        console.log(`download fail for url:${url}, e:`, e);
-        return { id, filename, url };
+        // console.log(`download fail for obj:`, returnObj , `e:`, e);
       }
+
+      return returnObj;
     });
 
 
 
-    let p = await PromiseAllWithProgress(promises, _=>console.log(`res Id = ${resId}, progress:${_}`));
+    let p = await PromiseAllWithProgress(promises, _=>this.setState({ progress: _ }));
 
-   
-
+    let cacheMap = {};
     //generate zip file and download
     for (let i = 0; i < p.length; i++) {
       const { id, filename, blob, url } = p[i];
       if(blob){
+        cacheMap[id] = { filename, extention: this.getURLExtention(url) };
         await zip.file(filename, blob);
       }else{
         forbiddenURLs[id] = url;
       }
     }
+    await zip.file('cache', new Blob([JSON.stringify(cacheMap, null, 1)], {type: "text/plain;charset=utf-8"}));
 
-    console.log(`forbiddenURLs:\n${JSON.stringify(forbiddenURLs)}`);
+    console.log(`forbiddenURLs:\n${JSON.stringify(forbiddenURLs, null, 2)}`);
 
     let blob = await zip.generateAsync({ type:"blob" });
     saveAs(blob, `${resId}.zip`);
   }
 
 
-  getS3Link = (path) => `https://ehla-media-bucket.s3-ap-southeast-1.amazonaws.com/apps/1.1.9/assets/${path}`;
+  getS3Link = (path) => `https://s3-ap-southeast-1.amazonaws.com/ehla-media-bucket/apps-dev/1.1.0/assets/${path}`;
 
   convert = async () => {
-    this.setState({ isActive: true });
+    this.setState({ isActive: true, assetsRes: null, progress: 0 });
 
     let resp = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTdYNQ7IPRj4i7z41JFLK8hHOh09Ds-3-Jz18bSW6q4EQdomUrDLW2nt27AIsjZonOYXhRQFOnFLKjS/pub?gid=0&single=true&output=csv");
     if(!resp.ok) return;
@@ -105,10 +113,17 @@ export default class GetCNRegionBase extends Component {
     let data = await Csv().fromString(content.replace("\uFEFF", ""));
 
 
-    let assetsRes = Object.keys(data[0]).filter(_=>_!="id");
+    let assetsRes = Object.keys(data[0]).filter(_=>_!=="id");
     console.log(`existing resolution:`, assetsRes);
 
-    await this.downloadAssetsBundle(data, '20');
+
+
+
+    for(let i = 0; i < assetsRes.length; i++) {
+      await this.downloadAssetsBundle(data, assetsRes[i]);
+    }
+
+    // await this.downloadAssetsBundle(data, '10');
 
     // let zip = new JSZip();
     // let data = await Csv().fromString(content);
@@ -139,10 +154,8 @@ export default class GetCNRegionBase extends Component {
     return (
       <section >
         <div style={{ border: '1px solid black', maxWidth: '100%', color: 'black', margin: 20 }} onClick={this.convert} >
-          <center><h1>Get Cached Bundle Zip</h1></center>
+          <center><h1>{!this.state.isActive?`Get Cached Bundle Zip`:`downloading scale:${this.state.assetsRes} progress:${this.state.progress}`}</h1></center>
         </div>
-        <LoadingOverlay active={this.state.isActive} spinner text='Loading your content...'>
-        </LoadingOverlay>
       </section>
     );
   }
