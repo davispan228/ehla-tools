@@ -54,12 +54,11 @@ export default class GetCNRegionBase extends Component {
       }
     }
 
-
     //publisher handler
     const parsePublisher = _=> {
       let { id, name_ref, region_ids, level_ids, ...props } = _;
-      props.region_idxes = region_ids.split(",").map(_=>data.regions.findIndex(r=>r.id===_));
-      props.level_values = level_ids.split(",").map(_=>data.levels.find(l=>l.id===_).value);
+      props.region_idxes = region_ids.split(",").map(_=>data.regions.findIndex(r=>`${r.id}`===_));
+      props.level_values = level_ids.split(",").map(_=>data.levels.find(l=>`${l.id}`===_).value);
       return props; 
     }
 
