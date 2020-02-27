@@ -64,7 +64,7 @@ export default class SentenceSRT2WordSRT extends Component {
     ];
     //output sentence CSV
     outputData = "\uFEFF";
-    outputData += "start_ms,end_ms,id,word_count,en,hk,cn,tw,jp,kr\n";
+    outputData += "start_ms,end_ms,id,word_count,thumbnail,en,hk,cn,tw,jp,kr\n";
     outputData += parsed.map(_=>{
       let text = _.text;
       specialWords.forEach(_=>text=text.replace(_, 'word'));
@@ -75,7 +75,7 @@ export default class SentenceSRT2WordSRT extends Component {
       text = text.replace(/!/g,' ');
       text = text.replace(/;/g,' ');
       const wordCount = text.split(' ').filter(_=>_!=='').length;
-      return `${_.start},${_.end},,${wordCount},"${_.text}",,,,,`;
+      return `${_.start},${_.end},,${wordCount},,"${_.text}",,,,,`;
     }).join("\n");
     blob = new Blob([outputData], {type: "text/plain;charset=utf-8"});
     saveAs(blob, `${fn}.csv`);

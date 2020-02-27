@@ -51,7 +51,7 @@ export default class SentenceCSV2DataFiles extends Component {
     //time file
     zip.file("time", data.map(_=>`${_.start_ms} ${_.end_ms}`).join("\n"));
     //other field
-    ['id', 'en', 'hk', 'cn', 'tw', 'jp', 'kr'].forEach(fn=>{
+    ['id', 'thumbnail', 'en', 'hk', 'cn', 'tw', 'jp', 'kr'].forEach(fn=>{
       zip.file(`${fn}`, data.map(_=>_[fn]).join("\n"));
     })
 
