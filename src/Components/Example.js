@@ -85,7 +85,7 @@ export default class SentenceSRT2WordSRT extends Component {
     });
   }
 
-
+// 
   render() {
     return (
       <div className="example">
