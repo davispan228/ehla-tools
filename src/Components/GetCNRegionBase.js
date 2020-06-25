@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as XLSX from 'xlsx';
+import { CorsifyURL } from '../Common';
 
 export default class GetCNRegionBase extends Component {
   constructor(props) {
@@ -42,7 +43,9 @@ export default class GetCNRegionBase extends Component {
   }
 
   convert = async () => {
-    let resp = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vSd9wPw4mD1f-Uvyk7DxRP892wFohetQzKABnLJq_T4bDfYbowuPP_hR98vu47eWdwUKI5JVtDAZPVK/pub?output=xlsx");
+    let fetchURL = CorsifyURL("https://docs.google.com/spreadsheets/d/e/2PACX-1vSd9wPw4mD1f-Uvyk7DxRP892wFohetQzKABnLJq_T4bDfYbowuPP_hR98vu47eWdwUKI5JVtDAZPVK/pub?output=xlsx");
+    let resp = await fetch(fetchURL);
+    
     if(!resp.ok) return;
 
     let blog = await resp.arrayBuffer();

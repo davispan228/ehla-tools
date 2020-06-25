@@ -3,6 +3,7 @@ import Csv from "csvtojson";
 import { saveAs } from 'file-saver';
 import { PromiseAllWithProgress }  from '../PromiseUtil';
 import JSZip from "jszip";
+import { CorsifyURL } from '../Common';
 const uuidv1 = require('uuid/v1');
 
 
@@ -105,8 +106,8 @@ export default class GetCNRegionBase extends Component {
 
   convert = async () => {
     this.setState({ isActive: true, assetsRes: null, progress: 0 });
-
-    let resp = await fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTdYNQ7IPRj4i7z41JFLK8hHOh09Ds-3-Jz18bSW6q4EQdomUrDLW2nt27AIsjZonOYXhRQFOnFLKjS/pub?gid=0&single=true&output=csv");
+    let fetchURL = CorsifyURL("https://docs.google.com/spreadsheets/d/e/2PACX-1vTdYNQ7IPRj4i7z41JFLK8hHOh09Ds-3-Jz18bSW6q4EQdomUrDLW2nt27AIsjZonOYXhRQFOnFLKjS/pub?gid=0&single=true&output=csv");
+    let resp = await fetch(fetchURL);
     if(!resp.ok) return;
 
     let content = await resp.text();
